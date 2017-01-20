@@ -1,0 +1,21 @@
+#! /bin/bash
+
+find ./ -iname "*.docx" -type f -exec sh -c 'cp ${0} "./output/$(basename ${0%.docx}.zip)"' {} \;
+find ./output/ -iname "*.zip" -type f -exec sh -c 'mkdir ${0%.zip}.docx' {} \;
+find ./output/ -iname "*.zip" -type f -exec sh -c 'unzip ${0} -d ${0%.zip}.docx' {} \;
+
+bodyContent=""
+for dir in ./output/*/; do
+	#using xmllint	
+	#bodyContent=$bodyContent$(xmllint --xpath "//*[local-name()='body']" $dir"word/document.xml")	
+	#using nokogiri as parser	
+	bodyContent=$bodyContent$(ruby mxmlparser.rb $dir"word/document.xml")
+done
+
+
+ruby mxmlmodifier.rb "${bodyContent}"
+#xmlstarlet edit -L -u '//w:body' -v "${bodyContent}" './output.docx/word/document.xml'
+
+
+
+
